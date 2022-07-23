@@ -1,0 +1,31 @@
+table {
+    border-collapse: separate;
+}
+
+td, th {
+    border: solid 1px #ced4da;
+}
+
+th {
+    border-bottom: solid 2px #737373;
+}
+
+td:last-child{
+    text-align: center;
+}
+
+tr:first-child th:first-child {
+    border-top-left-radius: 5px;
+}
+
+tr:first-child th:last-child {
+    border-top-right-radius: 5px;
+}
+
+tr:last-child td:first-child {
+    border-bottom-left-radius: 5px;
+}
+
+tr:last-child td:last-child {
+    border-bottom-right-radius: 5px;
+}

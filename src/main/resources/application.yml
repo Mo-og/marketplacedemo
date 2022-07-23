@@ -1,0 +1,32 @@
+spring:
+  jpa:
+    database: POSTGRESQL
+    show-sql: false
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        show_sql: true
+  datasource:
+    url: jdbc:postgresql://localhost:5432/marketplacedemo
+    username: demouser
+    password: '1234554321'
+    #    url: jdbc:postgresql://ec2-52-31-201-170.eu-west-1.compute.amazonaws.com:5432/d2d8d57ghtt4gq
+    #    username: jtwicqhtmnwkyw
+    #    password: 'c8d17b9e6c8a6e4d7247e675c198337263fd5ef3638736f564f7609e76ec3e23'
+    driverClassName: org.postgresql.Driver
+  sql:
+    init:
+      platform: postgres
+  thymeleaf:
+    encoding: UTF-8
+    cache: false
+    check-template: true
+    check-template-location: true
+
+logging.level.org.springframework.web: error
+logging.level.org.hibernate: info
+logging.level.com.example.marketplacedemo: debug
+#server:
+#  port: 80
