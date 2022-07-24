@@ -1,27 +1,34 @@
 package com.example.marketplacedemo.entities;
 
+import com.example.marketplacedemo.IllegalRequestInputException;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Pattern;
+import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 public class Product {
     @Id
-    @SequenceGenerator(name = "product_seq",
-            sequenceName = "product_sequence",
-            initialValue = 1, allocationSize = 20)
+    @SequenceGenerator(name = "product_seq", sequenceName = "product_sequence", allocationSize = 20)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "product_seq")
     @Column(nullable = false)
     private Long id;
     @Pattern(regexp = "\\p{L}+", message = "Name must consist of letters and have at least one.")
     private String name;
     @Min(value = 0, message = "Minimum allowed price is 0.")
-    private String price;
+    private BigDecimal price;
+    @JsonIgnore
+    @ManyToMany(mappedBy = "products")
+    Set<Client> clients;
 
     public Product() {
     }
 
-    public Product(Long id, String name, String price) {
+    public Product(Long id, String name, BigDecimal price) {
         this.id = id;
         this.name = name;
         this.price = price;
@@ -43,12 +50,37 @@ public class Product {
         this.name = name;
     }
 
-    public String getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(String price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
+    }
+
+    public Set<Client> getClients() {
+        return new HashSet<>(clients);
+    }
+
+    public boolean addClient(Client client) throws IllegalRequestInputException {
+        if (clients.contains(client)) return false;
+        boolean res = clients.add(client);
+        client.addProduct(this);
+        return res;
+    }
+
+    public boolean refundClient(Client client) {
+        if (!clients.contains(client)) return false;
+        boolean res = clients.remove(client);
+        client.refundProduct(this);
+        return res;
+    }
+
+    public boolean removeClient(Client client) {
+        if (!clients.contains(client)) return false;
+        boolean res = clients.remove(client);
+        client.removeProduct(this);
+        return res;
     }
 
     @Override
@@ -67,4 +99,6 @@ public class Product {
     public int hashCode() {
         return getId() != null ? getId().hashCode() : 0;
     }
+
+
 }

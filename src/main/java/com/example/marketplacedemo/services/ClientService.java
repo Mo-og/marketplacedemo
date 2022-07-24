@@ -25,7 +25,7 @@ public class ClientService {
         return clientRepository.findById(id);
     }
 
-    public void add(Client client){
+    public void save(Client client) {
         clientRepository.save(client);
     }
 

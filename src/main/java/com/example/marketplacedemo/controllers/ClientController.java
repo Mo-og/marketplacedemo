@@ -1,5 +1,6 @@
 package com.example.marketplacedemo.controllers;
 
+import com.example.marketplacedemo.IllegalRequestInputException;
 import com.example.marketplacedemo.entities.Client;
 import com.example.marketplacedemo.services.ClientService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,13 +45,19 @@ public class ClientController {
     public ResponseEntity<?> addClient(@ModelAttribute @Valid Client client, BindingResult bindingResult) {
         ResponseEntity<?> ErrorsMap = createErrorsMapResponse(bindingResult);
         if (ErrorsMap != null) return ErrorsMap;
-        clientService.add(client);
+        clientService.save(client);
         return ok();
     }
+
     @DeleteMapping("/rest/clients/{id}")
     public ResponseEntity<?> removeClientById(@PathVariable Long id) {
+        //Just to test that [alert is displayed with given error message] when trying to remove client that does not exist
+        if (clientService.getById(id).isEmpty())
+            throw new IllegalRequestInputException("No client for given id of " + id + " was found.");
         clientService.removeById(id);
         return ok();
     }
+
+
 
 }
