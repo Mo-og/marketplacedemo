@@ -87,8 +87,8 @@
 
     <properties>
         <compiler.plugin.version>3.10.1</compiler.plugin.version>
-        <source.version>11</source.version>
-        <target.version>11</target.version>
+        <source.version>15</source.version>
+        <target.version>15</target.version>
     </properties>
 
 </project>
