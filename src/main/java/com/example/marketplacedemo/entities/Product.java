@@ -100,7 +100,6 @@ public class Product implements Comparable<Product> {
         return getId() != null ? getId().hashCode() : 0;
     }
 
-
     @Override
     public int compareTo(Product o) {
         return (int) (id - o.id);

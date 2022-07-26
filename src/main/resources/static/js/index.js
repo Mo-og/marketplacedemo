@@ -8,7 +8,6 @@ $('table tbody').on('mousedown', 'tr', function () {
 })
 
 function highlightRow(clientId, productId) {
-    console.log(clientId + ' & ' + productId)
     if (clientId !== undefined) {
         $("#clients-table tr td:first-child").filter(function () {
             return $(this).text() == clientId;
