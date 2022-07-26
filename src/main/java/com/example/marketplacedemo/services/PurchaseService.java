@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
+import java.util.TreeSet;
 
 @Service
 public class PurchaseService {
@@ -49,10 +50,10 @@ public class PurchaseService {
     }
 
     public Set<Product> getClientsProducts(Long clientId) {
-        return getClientOrThrow(clientId).getProducts();
+        return new TreeSet<>(getClientOrThrow(clientId).getProducts());
     }
 
     public Set<Client> getProductCustomers(Long productId) {
-        return getProductOrThrow(productId).getClients();
+        return new TreeSet<>(getProductOrThrow(productId).getClients());
     }
 }

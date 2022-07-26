@@ -7,7 +7,24 @@ $('table tbody').on('mousedown', 'tr', function () {
     $(this).addClass('highlight')
 })
 
-function refreshClients() {
+function highlightRow(clientId, productId) {
+    console.log(clientId + ' & ' + productId)
+    if (clientId !== undefined) {
+        $("#clients-table tr td:first-child").filter(function () {
+            return $(this).text() == clientId;
+        }).closest("tr").addClass('highlight')
+
+    }
+    if (productId !== undefined) {
+        $("#products-table tr").filter(function () {
+            return $(this).children(':first').text() == productId;
+        }).closest("tr").addClass('highlight')
+    }
+
+}
+
+function refreshClients(highlight) {
+    let clientId = $("#client-select option:selected").val();
     $('#clients-table').empty();
     let container = $('#clients-container')
     container.addClass("loading");
@@ -16,10 +33,12 @@ function refreshClients() {
     $.get("/rest/clients", function (clients) {
         if (clients) {
             for (const client of clients) {
-                $('#clients-table').append(`<tr onclick='displayClientProducts(${client.id})'><td>${client.id} </td><td>${client.firstName}</td><td>${client.lastName} </td><td>${client.balance} </td><td><button class="btn btn-sm btn-outline-danger" type="button" onClick="removeClient(${client.id})">Remove</button></td></tr>`);
+                $('#clients-table').append(`<tr onclick='displayClientProducts(${client.id})'><td>${client.id}</td><td>${client.firstName}</td><td>${client.lastName}</td><td>${client.balance}</td><td><button class="btn btn-sm btn-outline-danger" type="button" onClick="removeClient(${client.id})">Remove</button></td></tr>`);
                 select.append(`<option value="${client.id}">#${client.id} - ${client.firstName} ${client.lastName} [${client.balance}]</option>`);
             }
         }
+        selectClient(clientId);
+        if (highlight) highlightRow(clientId);
     }).fail(function () {
         select.append(`<option selected>Unable to load clients data.</option>`);
         alert("Unable to load clients data. Please check your internet connection and make sure that server is online.")
@@ -27,41 +46,8 @@ function refreshClients() {
     container.removeClass("loading");
 }
 
-function highlightRow(clientId, productId) {
-    $('.highlight').removeClass('highlight');
-    if (clientId) {
-        $("#clients-table tr").filter(function () {
-            return $(this).children(':first').text() == clientId;
-        }).closest("tr").addClass('highlight')
-    }
-    if (productId) {
-        $("#products-table tr").filter(function () {
-            return $(this).children(':first').text() == productId;
-        }).closest("tr").addClass('highlight')
-    }
-
-}
-
-function displayClientProducts(id, productId) {
-    $('#products-table').empty();
-    let container = $('#products-container')
-    container.addClass("loading");
-
-    $.get("/rest/purchases/client/" + id, function (products) {
-        if (products) {
-            for (let i = 0; i < products.length; i++) {
-                $('#products-table').append(`<tr onclick='displayProductCustomers(${products[i].id})'><td>${products[i].id} </td><td>${products[i].name} </td><td>${products[i].price} </td><td><button class="btn btn-sm btn-outline-warning" type="button" onClick="refundClient(${id},${products[i].id})">Refund</button></td></tr>`);
-            }
-        }
-    }).fail(function () {
-        alert("Unable to load clients data. Please check your internet connection and make sure that server is online.")
-    }).always(function () {
-        highlightRow(id, productId)
-    });
-    container.removeClass("loading");
-}
-
-function refreshProducts() {
+function refreshProducts(highlight) {
+    let productId = $("#product-select option:selected").val();
     let table = $('#products-table')
     table.empty();
     let container = $('#products-container')
@@ -71,10 +57,12 @@ function refreshProducts() {
     $.get("/rest/products", function (products) {
         if (products) {
             for (const product of products) {
-                table.append(`<tr onclick='displayProductCustomers(${product.id})'><td>${product.id} </td><td>${product.name} </td><td>${product.price} </td><td><button class="btn btn-sm btn-outline-danger" type="button" onClick="removeProduct(${product.id})">Remove</button></td></tr>`);
+                table.append(`<tr onclick='displayProductCustomers(${product.id})'><td>${product.id}</td><td>${product.name}</td><td>${product.price}</td><td><button class="btn btn-sm btn-outline-danger" type="button" onClick="removeProduct(${product.id})">Remove</button></td></tr>`);
                 select.append(`<option value="${product.id}">#${product.id} - ${product.name} [${product.price}]</option>`);
             }
         }
+        selectProduct(productId);
+        if (highlight) highlightRow(undefined, productId)
     }).fail(function () {
         select.append(`<option selected>Unable to load products data.</option>`);
         alert("Unable to load products data. Please check your internet connection and make sure that server is online.")
@@ -82,14 +70,47 @@ function refreshProducts() {
     container.removeClass("loading");
 }
 
-function displayProductCustomers(id) {
+function displayClientProducts(clientId) {
+    selectClient(clientId);
+    $('#products-table').empty();
+    let container = $('#products-container')
+    container.addClass("loading");
+    $.get("/rest/purchases/client/" + clientId, function (products) {
+        if (products) {
+            for (let i = 0; i < products.length; i++) {
+                $('#products-table').append(`
+                    <tr onclick='displayProductCustomers(${products[i].id}); refreshProducts(true)'>
+                        <td>${products[i].id}</td>
+                        <td>${products[i].name}</td>
+                        <td>${products[i].price}</td>
+                        <td><button class="btn btn-sm btn-outline-warning" type="button" onClick="refundClient(${clientId},${products[i].id})">Refund</button></td>
+                    </tr>`);
+            }
+        }
+    }).fail(function () {
+        alert("Unable to load clients data. Please check your internet connection and make sure that server is online.")
+    });
+    container.removeClass("loading");
+}
+
+function displayProductCustomers(productId) {
+    selectProduct(productId);
     $('#clients-table').empty();
     let container = $('#clients-container')
     container.addClass("loading");
-    $.get("/rest/purchases/product/" + id, function (clients) {
+    $.get("/rest/purchases/product/" + productId, function (clients) {
         if (clients) {
             for (let i = 0; i < clients.length; i++) {
-                $('#clients-table').append(`<tr onclick='displayClientProducts(${clients[i].id})'><td>${clients[i].id}</td><td>${clients[i].firstName}</td><td>${clients[i].lastName}</td><td>${clients[i].balance}</td><td><button class="btn btn-sm btn-outline-warning" type="button" onClick="refundClient(${clients[i].id},${id})">Refund</button></td></tr>`);
+                $('#clients-table').append(`
+                    <tr onclick='displayClientProducts(${clients[i].id}); refreshClients(true)'>
+                        <td>${clients[i].id}</td>
+                        <td>${clients[i].firstName}</td>
+                        <td>${clients[i].lastName}</td>
+                        <td>${clients[i].balance}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-warning" type="button" onClick="refundClient(${clients[i].id},${productId})">Refund</button>
+                        </td>
+                    </tr>`);
             }
         }
     }).fail(function () {
@@ -186,7 +207,8 @@ function makePurchase() {
     $.post("/rest/purchases", {clientId: clientId, productId: productId}, function () {
         refreshClients()
         alert("Purchase successful!")
-        displayClientProducts(clientId, productId)
+        displayClientProducts(clientId)
+        highlightRow(clientId)
     }).fail(function (params) {
         let message = "Purchase was not successfull due to following problems:\n\n" + params.responseText;
         alert(message)
@@ -212,7 +234,16 @@ function refundClient(clientId, productId) {
     }
 }
 
+function selectClient(id) {
+    $('#client-select').val(id).change()
+}
+
+function selectProduct(id) {
+    $('#product-select').val(id).change()
+}
+
 function displayAll() {
+    $('highlight').removeClass('highlight')
     refreshClients();
     refreshProducts();
     $(".red").remove();
@@ -231,5 +262,4 @@ function fixTableLength() {
         productContainer.addClass('fix_height')
         $('#fixing_button').text('Unfix tables height')
     }
-
 }

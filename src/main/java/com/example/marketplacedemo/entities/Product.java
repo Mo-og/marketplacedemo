@@ -11,13 +11,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-public class Product {
+public class Product implements Comparable<Product> {
     @Id
     @SequenceGenerator(name = "product_seq", sequenceName = "product_sequence", allocationSize = 20)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "product_seq")
     @Column(nullable = false)
     private Long id;
-    @Pattern(regexp = "\\p{L}+", message = "Name must consist of letters and have at least one.")
+    @Pattern(regexp = "^([\\p{L}\\d]+[ -]?)*[\\p{L}\\d]+$", message = "Name may consist of letters, digits, spaces and dashes and must have at least one symbol.")
     private String name;
     @Min(value = 0, message = "Minimum allowed price is 0.")
     private BigDecimal price;
@@ -101,4 +101,8 @@ public class Product {
     }
 
 
+    @Override
+    public int compareTo(Product o) {
+        return (int) (id - o.id);
+    }
 }

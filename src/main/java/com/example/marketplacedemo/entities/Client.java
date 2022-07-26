@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-public class Client {
+public class Client implements Comparable<Client> {
     @Id
     @SequenceGenerator(name = "client_seq",
             sequenceName = "client_sequence", allocationSize = 20)
@@ -117,5 +117,10 @@ public class Client {
     @Override
     public int hashCode() {
         return getId() != null ? getId().hashCode() : 0;
+    }
+
+    @Override
+    public int compareTo(Client o) {
+        return (int) (id - o.id);
     }
 }
